@@ -56,13 +56,13 @@ struct FilterParameter final
 };
 
 /** @brief Filter function. */
-typedef std::function<void(std::vector<double>::iterator, std::vector<double>::iterator, std::vector<FilterParameter>)> Filter;
+typedef std::function<void(std::vector<double>::iterator, std::vector<double>::iterator, std::vector<double>::iterator, std::vector<FilterParameter>)> Filter;
 
-void applyFilter(std::vector<double>& signal, unsigned int threadCount, Filter filter, const std::vector<FilterParameter>& params);
+std::vector<double> applyFilter(std::vector<double>& signal, unsigned int threadCount, Filter filter, const std::vector<FilterParameter>& params);
 
 //filters
-void movingAverage_filter(std::vector<double>::iterator rangeStart, std::vector<double>::iterator rangeEnd, const std::vector<FilterParameter>& params);
-void exponential_filter(std::vector<double>::iterator rangeStart, std::vector<double>::iterator rangeEnd, const std::vector<FilterParameter>& params);
-void median_filter(std::vector<double>::iterator rangeStart, std::vector<double>::iterator rangeEnd, const std::vector<FilterParameter>& params);
+void movingAverage_filter(std::vector<double>::iterator target, std::vector<double>::iterator rangeStart, std::vector<double>::iterator rangeEnd, const std::vector<FilterParameter>& params);
+void exponential_filter(std::vector<double>::iterator target, std::vector<double>::iterator rangeStart, std::vector<double>::iterator rangeEnd, const std::vector<FilterParameter>& params);
+void median_filter(std::vector<double>::iterator target, std::vector<double>::iterator rangeStart, std::vector<double>::iterator rangeEnd, const std::vector<FilterParameter>& params);
 
 #endif

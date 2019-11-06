@@ -47,12 +47,13 @@ inline double findParameter(const std::string& paramName, const std::vector<Filt
 
 /**
  * @brief Moving average filter. Will apply filter between < rangeStart, rangeEnd ),
+ * @param target Start of the range where we suppose to put the results.
  * @param rangeStart Start the signal.
  * @param rangeEnd End of the signal.
  * @param params Parameters.
  * @throw MissingParameter If required parameters are not provided.
  */
-void movingAverage_filter(std::vector<double>::iterator rangeStart, std::vector<double>::iterator rangeEnd, const std::vector<FilterParameter>& params)
+void movingAverage_filter(std::vector<double>::iterator target, std::vector<double>::iterator rangeStart, std::vector<double>::iterator rangeEnd, const std::vector<FilterParameter>& params)
 {
     size_t blockSize;
     try
@@ -63,21 +64,26 @@ void movingAverage_filter(std::vector<double>::iterator rangeStart, std::vector<
     {
         throw(MissingParameter("Missing block-size parameter!"));
     }
-
+    
+    //copy first blockSize-1 elements to target
+    std::copy(rangeStart, std::next(rangeStart, blockSize-1), target);
+    target=std::next(target, blockSize-1);
     for(auto it=std::next(rangeStart, blockSize-1); it<rangeEnd; std::advance(it, 1))
     {
-        *it = std::accumulate(std::prev(it, blockSize-1), it+1, 0.0)/blockSize;
+        *target = std::accumulate(std::prev(it, blockSize-1), it+1, 0.0)/blockSize;
+        std::advance(target, 1);
     }
 }
 
 /**
  * @brief Moving average filter. Will apply filter between < rangeStart, rangeEnd),
+ * @param target Start of the range where we suppose to put the results.
  * @param rangeStart Start the signal.
  * @param rangeEnd End of the signal.
  * @param params Parameters.
  * @throw MissingParameter If required parameters are not provided.
  */
-void exponential_filter(std::vector<double>::iterator rangeStart, std::vector<double>::iterator rangeEnd, const std::vector<FilterParameter>& params)
+void exponential_filter(std::vector<double>::iterator target, std::vector<double>::iterator rangeStart, std::vector<double>::iterator rangeEnd, const std::vector<FilterParameter>& params)
 {
     double a;
     try
@@ -89,22 +95,27 @@ void exponential_filter(std::vector<double>::iterator rangeStart, std::vector<do
         throw(MissingParameter("Missing damping-coeff parameter!"));
     }
     
+    //copy first element
+    *target = *rangeStart;
     double memory = (1-a)*(*rangeStart);
+    target = std::next(target, 1);
     for(auto it = std::next(rangeStart, 1); it<rangeEnd; std::advance(it, 1))
     {
-        *it = (a*(*it)) + memory;
+        *target = (a*(*it)) + memory;
         memory = (1-a)*(*it);
+        std::advance(target, 1);
     }
 }
 
 /**
  * @brief Moving average filter. Will apply filter between < rangeStart, rangeEnd),
+ * @param target Start of the range where we suppose to put the results.
  * @param rangeStart Start the signal.
  * @param rangeEnd End of the signal.
  * @param params Parameters.
  * @throw MissingParameter If required parameters are not provided.
  */
-void median_filter(std::vector<double>::iterator rangeStart, std::vector<double>::iterator rangeEnd, const std::vector<FilterParameter>& params)
+void median_filter(std::vector<double>::iterator target, std::vector<double>::iterator rangeStart, std::vector<double>::iterator rangeEnd, const std::vector<FilterParameter>& params)
 {
     size_t blockSize;
     try
@@ -115,7 +126,7 @@ void median_filter(std::vector<double>::iterator rangeStart, std::vector<double>
     {
         throw(MissingParameter("Missing block-size parameter!"));
     }
-    
+
     std::vector<double> sortBuffer(blockSize);
     bool isOdd = blockSize%2;
     for(auto it = rangeStart; it<std::prev(rangeEnd, blockSize); std::advance(it, 1))
@@ -123,8 +134,13 @@ void median_filter(std::vector<double>::iterator rangeStart, std::vector<double>
         std::copy(it, std::next(it, blockSize-1), std::begin(sortBuffer));
         std::sort(std::begin(sortBuffer), std::end(sortBuffer));
         if(isOdd)
-           *it = sortBuffer[(blockSize/2)+1];
+           *target = sortBuffer[(blockSize/2)+1];
         else
-            *it = ((sortBuffer[(blockSize/2)]) + (sortBuffer[(blockSize/2)+1]))/2;
+           *target = ((sortBuffer[(blockSize/2)]) + (sortBuffer[(blockSize/2)+1]))/2;
+        
+        std::advance(target, 1);
     }
+    
+    //copy last block size elements
+    std::copy(std::prev(rangeEnd, blockSize), rangeEnd, target);
 }

@@ -133,27 +133,28 @@ int main(int argc, char* argv[])
     std::cout<<"Signal lenght: "<<signal.size()<<" samples"<<std::endl;
     
     //run filer
+    std::vector<double> output;
     std::cout<<"Running filter....";
     StopWatch watch;
     watch.start();
     if(filterType == "ma-filter")
-        applyFilter(signal, threadCount, movingAverage_filter, {{"block-size", static_cast<double>(blockSize)}});
+        output = applyFilter(signal, threadCount, movingAverage_filter, {{"block-size", static_cast<double>(blockSize)}});
     
     if(filterType == "exp-filter")
-        applyFilter(signal, threadCount, exponential_filter, {{"damping-coeff", a}});
+        output = applyFilter(signal, threadCount, exponential_filter, {{"damping-coeff", a}});
     
     if(filterType == "med-filter")
-        applyFilter(signal, threadCount, median_filter, {{"block-size", static_cast<double>(blockSize)}});
+        output = applyFilter(signal, threadCount, median_filter, {{"block-size", static_cast<double>(blockSize)}});
     watch.stop();
     std::cout<<"Done!"<<std::endl;
     
     //show performance
     std::cout<<"Filtering took: "<<watch.getTime()<<"s"<<std::endl;
     std::cout<<"Average speed: "<<signal.size()/watch.getTime()<<" ps/s"<<std::endl<<std::endl;
-    
+
     //save output file
     std::cout<<"Saving signal....";
-    saveSignal(signal, outputFile);
+    saveSignal(output, outputFile);
     std::cout<<"Done!"<<std::endl;
 
     return 0;

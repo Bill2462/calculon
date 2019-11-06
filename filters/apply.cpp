@@ -26,12 +26,13 @@
 
 /**
  * @brief Aply filter to the signal
- * @param signal Input signal.
+ * @param signal Input signal. Signal is not modified by the applyFilter function. 
  * @param threadCount Number of threads on which the filter will run.
  * @param filter Filter function.
  * @param params Filter parameters.
+ * @return Vector containing filtered signal.
  */
-void applyFilter(std::vector<double>& signal, unsigned int threadCount, Filter filter, const std::vector<FilterParameter>& params)
+std::vector<double> applyFilter(std::vector<double>& signal, unsigned int threadCount, Filter filter, const std::vector<FilterParameter>& params)
 {
     //validate thread count
     if(threadCount < 1)
@@ -40,20 +41,27 @@ void applyFilter(std::vector<double>& signal, unsigned int threadCount, Filter f
     //choose block size
     const size_t batchSize = signal.size()/threadCount;
     
+    //allocate memory for tbe output
+    std::vector<double> output(signal.size());
+
     //build worker pool
     std::vector<std::thread> workers(threadCount);//worker pool
     
     //worker
-    auto worker = [&params, &filter](auto begin_it, auto end_it){ filter(begin_it, end_it, params); };
+    auto worker = [&params, &filter](auto target_it, auto begin_it, auto end_it){ filter(target_it, begin_it, end_it, params); };
     
     //start workers
     auto it = std::begin(signal);
+    auto targetIt = std::begin(output);
     for(unsigned int i=0; i<threadCount; i++)
     {
-        workers[i] = std::thread(worker, it, std::next(it, batchSize));
+        workers[i] = std::thread(worker, targetIt, it, std::next(it, batchSize));
         std::advance(it, batchSize);
+        std::advance(targetIt, batchSize);
     }
     
     //wait for workers to finish
     std::for_each(std::begin(workers), std::end(workers), [](std::thread& thread){ thread.join(); });
+    
+    return output;
 }
