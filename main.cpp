@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
     if(filterType == "exp-filter")
     {
         std::cout<<"Filter type: Exponential averaging filter"<<std::endl;
-        std::cout<<"Damping coeffiients: "<<a<<std::endl;
+        std::cout<<"Damping coeffiient: "<<a<<std::endl;
     }
     if(filterType == "med-filter")
     {
@@ -150,7 +150,7 @@ int main(int argc, char* argv[])
     
     //show performance
     std::cout<<"Filtering took: "<<watch.getTime()<<"s"<<std::endl;
-    std::cout<<"Average speed: "<<signal.size()/watch.getTime()<<" ps/s"<<std::endl<<std::endl;
+    std::cout<<"Average speed: "<<signal.size()/watch.getTime()<<" Sa/s"<<std::endl<<std::endl;
 
     //save output file
     std::cout<<"Saving signal....";
