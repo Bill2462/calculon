@@ -131,12 +131,13 @@ void median_filter(std::vector<double>::iterator target, std::vector<double>::it
     bool isOdd = blockSize%2;
     for(auto it = rangeStart; it<std::prev(rangeEnd, blockSize); std::advance(it, 1))
     {
-        std::copy(it, std::next(it, blockSize-1), std::begin(sortBuffer));
+        std::copy(it, std::next(it, blockSize), std::begin(sortBuffer));
         std::sort(std::begin(sortBuffer), std::end(sortBuffer));
         if(isOdd)
            *target = sortBuffer[(blockSize/2)+1];
         else
            *target = ((sortBuffer[(blockSize/2)]) + (sortBuffer[(blockSize/2)+1]))/2;
+
         
         std::advance(target, 1);
     }
